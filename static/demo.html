@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>PageDown Demo Page</title>
+        
+        <link rel="stylesheet" type="text/css" href="css/demo.css" />
+        <link rel="stylesheet" type="text/css" href="css/jquery-ui.css" />
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+
+        <script type="text/javascript" src="js/Markdown.Converter.js"></script>
+        <script type="text/javascript" src="js/Markdown.Sanitizer.js"></script>
+        <script type="text/javascript" src="js/Markdown.Editor.js"></script>
+		<script type="text/javascript" src="js/jquery-2.1.3.min.js"></script>
+		<script type="text/javascript" src="js/jquery-ui.min.js"></script>
+		<script type="text/javascript" src="js/jquery.uploadify.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+    </head>
+    
+    <body>
+		<div class="container">
+			<h1>Demo</h1>
+			<div class="col-md-6">
+				<textarea id="content" class="form-control" rows=6>hello</textarea>
+				<input type="file" name="file_upload" id="file" data-action="/upload" multiple="true" />
+				<!--
+				<button id="btn-upload" class="btn btn-default">Upload</button>
+				<button id="btn-render" class="btn btn-default">Render</button>
+				-->
+			</div>
+			<div class="col-md-6" style="height: 100ps">
+				<div id="preview" style="border: 1px black solid; height: 100%"></div>
+			</div>
+		</div>
+
+        <script type="text/javascript">
+			$(function(){
+				var $content = $("#content");
+				var $preview = $("#preview");
+				var $file = $("#file");
+				var cvt = new Markdown.Converter();
+
+				var insertText = function(text){
+					var obj = $content.get(0);
+					var str = text;
+					if (document.selection) {
+						obj.focus();
+						var sel = document.selection.createRange();
+						sel.text = str;
+					} else if (typeof obj.selectionStart === 'number' && typeof obj.selectionEnd === 'number') {
+						var startPos = obj.selectionStart;
+						var endPos = obj.selectionEnd;
+						var tmpStr = obj.value;
+						obj.value = tmpStr.substring(0, startPos) + str + tmpStr.substring(endPos, tmpStr.length);
+					} else {
+						obj.value += str;
+					}
+				};
+
+				$file.uploadify({
+					'formData'     : {
+						'timestamp' : 'hello',
+						'token'     : 'nothing'
+					},
+					'swf'      : 'uploadify.swf',
+					'uploader' : "/upload",
+					'onUploadSuccess': function(file, data, response){
+						console.log(file.name);
+						var data = JSON.parse(data);
+						console.log(data.image_path);
+						insertText("!["+file.name+"]("+data.image_path+")");
+					},
+				});
+				// auto render
+				var wto, wi = 0;
+				$content.on("propertychange change keyup paste input", function(){
+					if (wto && wi < 3){
+						wto && clearTimeout(wto);
+						wi = wi + 1;
+					}
+					wto = setTimeout(function() {
+						// do stuff when user has been idle for some second
+						console.log("Hello changed");
+						var html = cvt.makeHtml($content.val());
+						$preview.html(html);
+						wi = 0;
+					}, 500);
+				});
+			});
+        </script>
+    </body>
+</html>
