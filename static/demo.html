@@ -55,6 +55,7 @@
 					} else {
 						obj.value += str;
 					}
+					renderMarkdown();
 				};
 
 				$file.uploadify({
@@ -71,6 +72,11 @@
 						insertText("!["+file.name+"]("+data.image_path+")");
 					},
 				});
+				var renderMarkdown = function(){
+						var html = cvt.makeHtml($content.val());
+						$preview.html(html);
+				};
+
 				// auto render
 				var wto, wi = 0;
 				$content.on("propertychange change keyup paste input", function(){
@@ -80,10 +86,8 @@
 					}
 					wto = setTimeout(function() {
 						// do stuff when user has been idle for some second
-						console.log("Hello changed");
-						var html = cvt.makeHtml($content.val());
-						$preview.html(html);
 						wi = 0;
+						renderMarkdown();
 					}, 500);
 				});
 			});
