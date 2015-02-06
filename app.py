@@ -13,6 +13,7 @@ import json
 import flask
 
 UPLOAD_FOLDER = 'static/upload'
+PORT = os.getenv('PORT') or '9999'
 
 app = flask.Flask(__name__)
 
@@ -31,4 +32,4 @@ def upload():
     return json.dumps(dict(image_path='/'+target_path, success=True, message='Good'))
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=9999, debug=True)
+    app.run(host='0.0.0.0', port=int(PORT), debug=True)
